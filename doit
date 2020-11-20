@@ -1,0 +1,17 @@
+apt update && apt upgrade -y
+apt install xorg i3 chromium
+
+useradd -ms /bin/bash chromium
+
+echo '[Service]' > /etc/systemd/system/getty@tty1.service.d/override.conf
+echo 'ExecStart=' >> /etc/systemd/system/getty@tty1.service.d/override.conf
+echo 'ExecStart=-/usr/sbin/agetty --autologin chromium --noclear %I $TERM' >> /etc/systemd/system/getty@tty1.service.d/override.conf
+systemctl enable getty@tty1
+
+echo 'if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then' >> /etc/profile
+echo '    startx && exit' >> /etc/profile
+echo 'fi' >> /etc/profile
+
+sed -i 's/exec i3-config-wizard/exec --no-startup-id chromium && i3-msg exit/g' /etc/i3/config
+
+shutdown -r now
